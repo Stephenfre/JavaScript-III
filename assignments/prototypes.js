@@ -1,68 +1,133 @@
-/* The for principles of "this";
-* in your own words. explain the four principle for the "this" keyword below.
-*
-* 1. When in the global scope, the value of "this." will be the window/console object.  
+/*
+  Object oriented design is commonly used in video games.  For this part of the assignment you will be implementing several constructor functions with their correct inheritance hierarchy.
 
-* 2. IMPLICIT BINDING - When a fuction is called with a preceding dot, the object before the dot is "this".
+  In this file you will be creating three constructor functions: GameObject, CharacterStats, Humanoid.  
 
-* 3. NEW BINDING - WHneever a constructor function is used, this refers to the specific instance of the object that is created and returned by the constructor function.
-
-* 4. EXPLICIT BINDING - When .call or .apply method is used.
-*
-* write out a code example of each explanation above
+  At the bottom of this file are 3 objects that all end up inheriting from Humanoid.  Use the objects at the bottom of the page to test your constructor functions.
+  
+  Each constructor function has unique properties and methods that are defined in their block comments below:
 */
 
-// Principle 1
-function sayMyName(name) {
-  console.log(this);
-  return name;
-}
-sayMyName("Destinys Child");
-// code example for Window Binding
+/*
+  === GameObject ===
+  * createdAt
+  * name
+  * dimensions (These represent the character's size in the video game)
+  * destroy() // prototype method that returns: `${this.name} was removed from the game.`
+*/
 
-// Principle 2
-const theWeeknd = {
-  lyrics: "So call out",
-  callMyName: function(name) {
-    console.log(`${this.lyrics} my name ${name}`);
-  }
+function GameObject(properties) {
+  this.createdAt = properties.createdAt;
+  this.name = properties.name;
+  this.dimensions = properties.dimensions;
+}
+
+GameObject.prototype.destroy = function() {
+  return `${this.name} was removed from the game.`;
 };
-theWeeknd.callMyName("-The Weeknd");
-// code example for Implicit Binding
 
-// Principle 3
-function friends(greeter) {
-  this.greeting = "Hello";
-  this.greeter = greeter;
-  this.speak = function() {
-    console.log(this.greeting + this.greeter);
-    console.log(this);
-  };
+/*
+  === CharacterStats ===
+  * healthPoints
+  * takeDamage() // prototype method -> returns the string '<object name> took damage.'
+  * should inherit destroy() from GameObject's prototype
+*/
+
+function CharacterStats(stats) {
+  GameObject.call(this, stats);
+  this.healthPoints = stats.healthPoints;
 }
 
-const stephen = new friends(" Summer");
-const summer = new friends(" Stephen");
+CharacterStats.prototype = Object.create(GameObject.prototype);
 
-stephen.speak();
-summer.speak();
-// code example for New Binding
+CharacterStats.prototype.takeDamage = function() {
+  return `${this.name} took damage.`;
+};
 
-// Principle 4
-function Avengers(friend2) {
-  this.friendOne = "Hello ";
-  this.friendTwo = friend2;
-  this.speak = function() {
-    console.log(this.friendOne + this.friendTwo);
-    console.log(this);
-  };
+/*
+  === Humanoid (Having an appearance or character resembling that of a human.) ===
+  * team
+  * weapons
+  * language
+  * greet() // prototype method -> returns the string '<object name> offers a greeting in <object language>.'
+  * should inherit destroy() from GameObject through CharacterStats
+  * should inherit takeDamage() from CharacterStats
+*/
+function Humanoid(apperance) {
+  CharacterStats.call(this, apperance);
+  this.team = apperance.team;
+  this.weapons = apperance.weapons;
+  this.language = apperance.language;
 }
 
-const captainAmerica = new Avengers("Captain America");
-const ironMan = new Avengers("Ironman");
+Humanoid.prototype = Object.create(CharacterStats.prototype);
 
-captainAmerica.speak.call("Ironman");
-ironMan.speak.apply("CaptainAmerica");
+Humanoid.prototype.greet = function() {
+  return `${this.name} offers a greeting in ${this.language}.`;
+};
 
-captainAmerica.speak();
-ironMan.speak();
-// code example for Explicit Binding
+/*
+ * Inheritance chain: GameObject -> CharacterStats -> Humanoid
+ * Instances of Humanoid should have all of the same properties as CharacterStats and GameObject.
+ * Instances of CharacterStats should have all of the same properties as GameObject.
+ */
+
+// Test you work by un-commenting these 3 objects and the list of console logs below:
+
+const mage = new Humanoid({
+  createdAt: new Date(),
+  dimensions: {
+    length: 2,
+    width: 1,
+    height: 1
+  },
+  healthPoints: 5,
+  name: "Bruce",
+  team: "Mage Guild",
+  weapons: ["Staff of Shamalama"],
+  language: "Common Tongue"
+});
+
+const swordsman = new Humanoid({
+  createdAt: new Date(),
+  dimensions: {
+    length: 2,
+    width: 2,
+    height: 2
+  },
+  healthPoints: 15,
+  name: "Sir Mustachio",
+  team: "The Round Table",
+  weapons: ["Giant Sword", "Shield"],
+  language: "Common Tongue"
+});
+
+const archer = new Humanoid({
+  createdAt: new Date(),
+  dimensions: {
+    length: 1,
+    width: 2,
+    height: 4
+  },
+  healthPoints: 10,
+  name: "Lilith",
+  team: "Forest Kingdom",
+  weapons: ["Bow", "Dagger"],
+  language: "Elvish"
+});
+
+console.log(mage.createdAt); // Today's date
+console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
+console.log(swordsman.healthPoints); // 15
+console.log(mage.name); // Bruce
+console.log(swordsman.team); // The Round Table
+console.log(mage.weapons); // Staff of Shamalama
+console.log(archer.language); // Elvish
+console.log(archer.greet()); // Lilith offers a greeting in Elvish.
+console.log(mage.takeDamage()); // Bruce took damage.
+console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
+
+// Stretch task:
+// * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.
+// * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
+// * Create two new objects, one a villain and one a hero and fight it out with methods!
